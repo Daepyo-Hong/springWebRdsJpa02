@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <a href="/">HOME</a>
+    <p>게시글 페이지</p>
+    <table>
+        <tr>
+            <th>글번호</th>
+            <th>제목</th>
+            <th>조회수</th>
+            <th>작성자</th>
+            <th>최종수정일</th>
+        </tr>
+        <tr th:each="dto: ${list}">
+            <td th:text="${dto.bno}">글번호</td>
+            <td>[[${dto.title}]]</td>
+            <td th:text="${dto.readCount}">조회수</td>
+            <td th:text="${dto.writer}">작성자</td>
+            <td th:text="${dto.updatedDate}">최종수정일</td>
+        </tr>
+    </table>
+</body>
+</html>
