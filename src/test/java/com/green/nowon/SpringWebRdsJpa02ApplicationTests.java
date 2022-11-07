@@ -1,5 +1,7 @@
 package com.green.nowon;
 
+import com.green.nowon.domain.dao.MyBoardMapper;
+import com.green.nowon.domain.dto.mybatis.MyBoardDTO;
 import com.green.nowon.domain.entity.BoardEntity;
 import com.green.nowon.domain.entity.BoardEntityRepository;
 import com.green.nowon.domain.entity.ReplyEntity;
@@ -19,6 +21,18 @@ class SpringWebRdsJpa02ApplicationTests {
 
     @Autowired
     ReplyEntityRepository replyEntityRepository;
+
+    @Autowired
+    MyBoardMapper myBoardMapper;
+
+    @Test
+    void insertTest(){
+        MyBoardDTO obj= MyBoardDTO.builder()
+                .title("제목테스트").content("내용테스트").writer("작성자Text")
+                .build();
+
+        myBoardMapper.save(obj);
+    }
 
     @Test
     void 댓글생성(){
