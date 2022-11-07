@@ -69,7 +69,7 @@ class SpringWebRdsJpa02ApplicationTests {
         BoardEntity result= repository.findById(bno).orElseThrow();
         System.out.println(result);
         System.out.println(">>>>>>>>>>댓글");
-        List<ReplyEntity> replyResult = replyEntityRepository.findByBoardBno(bno);
+        List<ReplyEntity> replyResult = replyEntityRepository.findByBoardEntityBno(bno);
         for(ReplyEntity r: replyResult){
             System.out.println(r);
         }
