@@ -18,7 +18,8 @@
         </tr>
         <tr th:each="dto: ${list}">
             <td th:text="${dto.bno}">글번호</td>
-            <td>[[${dto.title}]]</td>
+            <!--<td><a th:href="|/mybatis/boards/${dto.bno}|">[[${dto.title}]]</a></td>-->
+            <td><a th:href="@{/mybatis/boards/{bno}(bno=${dto.bno})}">[[${dto.title}]]</a></td>
             <td th:text="${dto.readCount}">조회수</td>
             <td th:text="${dto.writer}">작성자</td>
             <td th:text="${dto.updatedDate}">최종수정일</td>

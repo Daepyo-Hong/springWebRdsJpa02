@@ -1,7 +1,6 @@
 package com.green.nowon.domain.dto.board;
 
 import com.green.nowon.domain.entity.BoardEntity;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

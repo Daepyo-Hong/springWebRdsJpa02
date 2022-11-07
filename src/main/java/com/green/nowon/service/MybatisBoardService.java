@@ -8,4 +8,8 @@ public interface MybatisBoardService {
     void list(Model model);
 
     void save(MyBoardDTO dto);
+
+    void detail(long bno, Model model);
+
+    void delete(long bno);
 }

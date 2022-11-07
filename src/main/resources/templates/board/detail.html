@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <a href="/">HOME</a>
+    <p>마이바티스 게시글 상세페이지</p>
+    <ul>
+        <li>[[${detail.bno}]]</li>
+        <li>[[${detail.writer}]]</li>
+        <li>[[${detail.title}]]</li>
+        <li>[[${detail.content}]]</li>
+        <li>[[${detail.createdDate}]]</li>
+    </ul>
+    <form th:action="@{/mybatis/boards/{bno}(bno=${detail.bno})}" method="post">
+        <input type="hidden" name="_method" value="DELETE">
+
+        <button type="submit">삭제</button>
+    </form>
+</body>
+</html>
