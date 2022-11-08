@@ -1,9 +1,7 @@
 package com.green.nowon.service.board;
 
 import com.green.nowon.domain.dao.MyBoardMapper;
-import com.green.nowon.domain.dao.MyReplyMapper;
 import com.green.nowon.domain.dto.mybatis.MyBoardDTO;
-import com.green.nowon.domain.dto.mybatis.MyReply;
 import com.green.nowon.service.MybatisBoardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,20 +33,12 @@ public class MybatisBoardServiceProcess  implements MybatisBoardService {
     }
 
 
-    @Autowired
-    private MyReplyMapper myReplyMapper;
-
     //상세페이지 처리
     @Override
     public void detail(long bno, Model model) {
         MyBoardDTO result = mapper.findByBno(bno);
 
         model.addAttribute("detail",result);
-
-        //댓글도 읽어와서
-        List<MyReply> replies = myReplyMapper.findByBno(bno);
-        model.addAttribute("replies",replies );
-
     }
 
     @Override

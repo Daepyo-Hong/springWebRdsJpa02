@@ -16,8 +16,36 @@
 
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script type="text/javascript">
+    <script th:inline="javascript">
+        var bno = "[[${detail.bno}]]";
+        $(function (){
+            getReplies();
 
+        });
+
+        //ajax로 댓글 갖고오는 함수
+        function getReplies() {
+            $.get("/mybatis/boards/"+bno+"/replies",
+                function(resp){
+                    $("#display").html(resp);
+                }
+            );
+        }
+        //ajax로 댓글 등록
+        function registReply(el){
+            $.post("/mybatis/boards/"+bno+"/reply",
+                {text:$("#text").val(), writer:$("#writer").val()},
+                function(data,status,xhr){
+                    console.log("처리결과: "+status);
+                    if(status=="seccess"){
+                        getReplies();
+                    }
+                    if(status=="error"){
+                        alert("등록 실패!");
+                    }
+                }
+            );
+        }
         function showEitMode(){
             $(".edit-mode").show();
             $(".default-mode").hide();
@@ -44,7 +72,7 @@
 
     </script>
 </head>
-<body>
+<body >
     <a href="/">HOME</a>
     <p>마이바티스 게시글 상세페이지</p>
     <form th:action="|/mybatis/boards/${detail.bno}|" method="post">
@@ -79,49 +107,13 @@
     <section>
         <h1>댓글영역</h1>
         <div>
-            <!--<form th:action="|/mybatis/boards/${detail.bno}/reply|" method="post">-->
-            <form th:action="@{/mybatis/boards/{bno}/reply(bno=${detail.bno})}" method="post">
-                <input type="text" name="text" placeholder="댓글입력">
-                <input type="hidden" name="writer" value="테스트">
-                <button type="submit">등록</button>
-            </form>
+            <div>
+                <input type="text" id="text" placeholder="댓글입력">
+                <input type="hidden" id="writer" value="테스트">
+                <button type="button" onclick="registReply(this)">등록</button>
+            </div>
+            <div id="display">댓글이 존재하지 않아요</div>
 
-            <table border="1">
-                <tr>
-                    <td>댓글</td>
-                    <td>
-                        <div>작성자</div>
-                        <div>작성일</div>
-                    </td>
-                    <td>
-                        관리
-                    </td>
-                </tr>
-                <tr th:each="dto : ${replies}">
-                    <td class="reply-default-mode" th:text="${dto.text}">댓글</td>
-                    <td class="reply-edit-mode">
-                        <form class="re-edit-form" th:action="|/mybatis/boards/${detail.bno}/reply/${dto.rno}|" method="post">
-                            <input type="text" name="text" th:value="${dto.text}">
-                            <input type="hidden" name="_method" value="PUT">
-                        </form>
-                    </td>
-                    <td>
-                        <div th:text="${dto.writer}">작성자</div>
-                        <div th:text="${dto.createdDate}">작성일</div>
-                    </td>
-                    <td  class="reply-default-mode">
-                        <button type="button" onclick="replyEditClicked(this)">수정</button>
-                        <form th:action="|/mybatis/boards/${detail.bno}/reply/${dto.rno}|" method="post">
-                            <input type="hidden" name="_method" value="DELETE">
-                            <button type="submit">삭제</button>
-                        </form>
-                    </td>
-                    <td class="reply-edit-mode">
-                        <button type="button" onclick="reEditProc(this)">수정완료</button>
-                        <button type="button" onclick="replyEditCancel(this)">취소</button>
-                    </td>
-                </tr>
-            </table>
         </div>
     </section>
 
