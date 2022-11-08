@@ -3,21 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <style type="text/css">
+        .edit-mode{
+            display: none;
+        }
+        .flex{
+            display: flex;
+        }
+        .reply-edit-mode{
+            display: none;
+        }
+
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script type="text/javascript">
+
+        function showEitMode(){
+            $(".edit-mode").show();
+            $(".default-mode").hide();
+        }
+        function showDefaultMode() {
+            $(".edit-mode").hide();
+            $(".default-mode").show();
+        }
+        function confirmDelete() {
+            return confirm("정말 삭제 하시겠습니까?");
+        }
+
+        function replyEditClicked(el){
+            $(el).parents("tr").css("background-color","yellow").find(".reply-edit-mode").show();
+            $(el).parents("tr").find(".reply-default-mode").hide();
+        }
+        function replyEditCancel(el){
+            $(el).parents("tr").css("background-color","transparent").find(".reply-default-mode").show();
+            $(el).parents("tr").find(".reply-edit-mode").hide();
+        }
+        function reEditProc(el){
+            $(el).parents("tr").find(".re-edit-form").submit();
+        }
+
+    </script>
 </head>
 <body>
     <a href="/">HOME</a>
     <p>마이바티스 게시글 상세페이지</p>
-    <ul>
-        <li>[[${detail.bno}]]</li>
-        <li>[[${detail.writer}]]</li>
-        <li>[[${detail.title}]]</li>
-        <li>[[${detail.content}]]</li>
-        <li>[[${detail.createdDate}]]</li>
-    </ul>
-    <form th:action="@{/mybatis/boards/{bno}(bno=${detail.bno})}" method="post">
-        <input type="hidden" name="_method" value="DELETE">
-
-        <button type="submit">삭제</button>
+    <form th:action="|/mybatis/boards/${detail.bno}|" method="post">
+        <ul>
+            <li>[[${detail.bno}]]</li>
+            <li>[[${detail.writer}]]</li>
+            <li>
+                <div class="default-mode">[[${detail.title}]]</div>
+                <div class="edit-mode"><input type="text" name="title" th:value="${detail.title}"></div>
+            </li>
+            <li>
+                <div class="default-mode">[[${detail.content}]]</div>
+                <div class="edit-mode">
+                    <textarea rows="5" cols="60" name="content">[[${detail.content}]]</textarea>
+                </div>
+            </li>
+            <li class="edit-mode">
+                <input type="hidden" name="_method" value="PUT">
+                <button type="submit">수정완료</button>
+                <button type="button" onclick="showDefaultMode()">취소</button>
+            </li>
+        </ul>
     </form>
+    <div class="default-mode flex">
+        <button type="button" id="btn-edit" onclick="showEitMode()">수정</button>
+        <form th:action="@{/mybatis/boards/{bno}(bno=${detail.bno})}" method="post" onsubmit="return confirmDelete()">
+            <input type="hidden" name="_method" value="DELETE">
+            <button type="submit">삭제</button>
+        </form>
+    </div>
+    <hr>
+    <section>
+        <h1>댓글영역</h1>
+        <div>
+            <!--<form th:action="|/mybatis/boards/${detail.bno}/reply|" method="post">-->
+            <form th:action="@{/mybatis/boards/{bno}/reply(bno=${detail.bno})}" method="post">
+                <input type="text" name="text" placeholder="댓글입력">
+                <input type="hidden" name="writer" value="테스트">
+                <button type="submit">등록</button>
+            </form>
+
+            <table border="1">
+                <tr>
+                    <td>댓글</td>
+                    <td>
+                        <div>작성자</div>
+                        <div>작성일</div>
+                    </td>
+                    <td>
+                        관리
+                    </td>
+                </tr>
+                <tr th:each="dto : ${replies}">
+                    <td class="reply-default-mode" th:text="${dto.text}">댓글</td>
+                    <td class="reply-edit-mode">
+                        <form class="re-edit-form" th:action="|/mybatis/boards/${detail.bno}/reply/${dto.rno}|" method="post">
+                            <input type="text" name="text" th:value="${dto.text}">
+                            <input type="hidden" name="_method" value="PUT">
+                        </form>
+                    </td>
+                    <td>
+                        <div th:text="${dto.writer}">작성자</div>
+                        <div th:text="${dto.createdDate}">작성일</div>
+                    </td>
+                    <td  class="reply-default-mode">
+                        <button type="button" onclick="replyEditClicked(this)">수정</button>
+                        <form th:action="|/mybatis/boards/${detail.bno}/reply/${dto.rno}|" method="post">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="submit">삭제</button>
+                        </form>
+                    </td>
+                    <td class="reply-edit-mode">
+                        <button type="button" onclick="reEditProc(this)">수정완료</button>
+                        <button type="button" onclick="replyEditCancel(this)">취소</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </section>
+
 </body>
 </html>

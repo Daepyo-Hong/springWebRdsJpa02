@@ -1,7 +1,9 @@
 package com.green.nowon.service.board;
 
 import com.green.nowon.domain.dao.MyBoardMapper;
+import com.green.nowon.domain.dao.MyReplyMapper;
 import com.green.nowon.domain.dto.mybatis.MyBoardDTO;
+import com.green.nowon.domain.dto.mybatis.MyReply;
 import com.green.nowon.service.MybatisBoardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,7 +17,9 @@ public class MybatisBoardServiceProcess  implements MybatisBoardService {
     //Mybatis를 이용한 DB : DAO 역할-Mapper
 
     @Autowired
-    MyBoardMapper mapper;
+    private MyBoardMapper mapper;
+
+
 
     @Override
     public void list(Model model) {
@@ -30,15 +34,32 @@ public class MybatisBoardServiceProcess  implements MybatisBoardService {
         mapper.save(dto);
     }
 
+
+    @Autowired
+    private MyReplyMapper myReplyMapper;
+
     //상세페이지 처리
     @Override
     public void detail(long bno, Model model) {
         MyBoardDTO result = mapper.findByBno(bno);
+
         model.addAttribute("detail",result);
+
+        //댓글도 읽어와서
+        List<MyReply> replies = myReplyMapper.findByBno(bno);
+        model.addAttribute("replies",replies );
+
     }
 
     @Override
     public void delete(long bno) {
         mapper.deleteByBno(bno);
+    }
+
+    @Override
+    public void update(long bno, MyBoardDTO dto) {
+        //수정할 때
+        dto.setBno(bno);
+        mapper.updateByBno(dto);
     }
 }

@@ -12,4 +12,6 @@ public interface MybatisBoardService {
     void detail(long bno, Model model);
 
     void delete(long bno);
+
+    void update(long bno, MyBoardDTO dto);
 }
