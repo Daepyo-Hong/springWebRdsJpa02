@@ -13,10 +13,18 @@ public class MyReplyController {
     @Autowired
     private MyReplyService service;
 
+
+    @ResponseBody
+    @GetMapping("/mybatis/boards/{bno}/count")
+    public int count(@PathVariable long bno){
+        return service.getCount(bno);
+    }
+
     //댓글 모두 읽어오기
     @GetMapping("/mybatis/boards/{bno}/replies")
-    public String replies(@PathVariable long bno, Model model){
-        service.getList(bno, model);
+    public String replies(@PathVariable long bno, int page, Model model){
+        System.out.println("page : "+page);
+        service.getList(bno,page ,model);
         //@ResponseBody 는 값을 전달하는 것임,
         return "board/replies"; //응답을 다른 페이지로 처리(HTML 페이지 결과 페이지)
     }
@@ -36,9 +44,10 @@ public class MyReplyController {
         return service.delete(rno);
     }
 
+    @ResponseBody       //응답데이터는 void지만 정상적으로 처리되고 응답하였다는걸 의미(ajax success함수실행)
     @PutMapping("/mybatis/boards/{bno}/reply/{rno}")
-    public String update(@PathVariable long bno, @PathVariable long rno, String text){
+    public void update(@PathVariable long bno, @PathVariable long rno, String text){
         service.update(rno, text);
-        return "redirect:/mybatis/boards/" + bno;
+        //return "redirect:/mybatis/boards/" + bno;
     }
 }

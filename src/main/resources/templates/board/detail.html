@@ -4,13 +4,15 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <style type="text/css">
-        .edit-mode{
+        .edit-mode {
             display: none;
         }
-        .flex{
+
+        .flex {
             display: flex;
         }
-        .reply-edit-mode{
+
+        .reply-edit-mode {
             display: none;
         }
 
@@ -18,139 +20,206 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script th:inline="javascript">
         var bno = "[[${detail.bno}]]";
-        $(function (){
-            getReplies();
+        var rpage = 1;
+        var rpageTotal = 0;
+        $(function () {
+            setCount();
+
+            $("#text").keyup(inputEnterKey);
+            $("#btnAdd").click(function () {
+                rpage++;
+                setCount();
+            });
         });
 
         //댓글 삭제 처리
-        function reDeleteProc(rno){  //rno: 클릭시 전달받은 rno
+        function reDeleteProc(rno) {  //rno: 클릭시 전달받은 rno
             //alert(rno);
             $.ajax({
-                url: "/mybatis/boards/"+bno+"/reply/"+rno,
+                url: "/mybatis/boards/" + bno + "/reply/" + rno,
                 type: "delete",   //ajax 에서만 단순화 가능
                 //type: "post",
                 //data: {_method: "delete"},
-                success:function (result){   //result:삭제 행 개수
-                    console.log("삭제 개수:"+result);
+                success: function (result) {   //result:삭제 행 개수
+                    console.log("삭제 개수:" + result);
+                    rpage = 1;
+                    setCount();
+                }
+            });
+        }
+
+        function setCount(){
+            $.ajax({
+                url: "/mybatis/boards/" + bno + "/count",
+                success: function (result) {
+                    rpageTotal = result;
                     getReplies();
+                    console.log("댓글마지막페이지: " + rpageTotal);
                 }
             });
         }
 
         //ajax로 댓글 갖고오는 함수
         function getReplies() {
-            $.get("/mybatis/boards/"+bno+"/replies",
-                function(resp){
-                    $("#display").html(resp);
+
+            $.get("/mybatis/boards/" + bno + "/replies",
+                {page: rpage},
+                function (resp) {
+                    var content = "";
+                    if (rpage > 1) {
+                        content += $("#display").html();       //읽어와요.
+                    }
+                    $("#display").html(content + resp);
+                    if (rpage >= rpageTotal) {
+                        $("#btnAdd").hide();
+                    } else {
+                        $("#btnAdd").show();
+                    }
+
                 }
             );
         }
-        //ajax로 댓글 등록
-        function registReply(el){
+
+        //ajax로 댓글  : 등록버튼이 눌러졌을때 실행
+        function registReply() {
             let text = $("#text").val();
+            if (text.trim() == "") {       //공백체크
+                alert("댓글이 입력되지 않았어요.");
+                return;
+            }
             $.ajax({
-                url : "/mybatis/boards/"+bno+"/reply",
-                type : "post",
-                data : {            //data의 key는 쌍따옴표 있든 없든 문자열임(변수 아님)
-                    text : text,    //key(문자열) : value(현재 변수적용)
-                    writer : $("#writer").val()
+                url: "/mybatis/boards/" + bno + "/reply",
+                type: "post",
+                data: {            //data의 key는 쌍따옴표 있든 없든 문자열임(변수 아님)
+                    text: text,    //key(문자열) : value(현재 변수적용)
+                    writer: $("#writer").val()
                 },
-                error:function (error) {
-                    alert("댓글 등록이 정상적으로 처리되지 않았어요\n"+error);
+                error: function (error) {
+                    alert("댓글 등록이 정상적으로 처리되지 않았어요\n" + error);
                 },
-                success:function (result){
-                    console.log("처리결과: "+result);
-                    getReplies();
+                success: function (result) {
+                    console.log("처리결과: " + result);
+                    rpage = 1;
+                    setCount();
+                    $("#text").val("");     //댓글 등록후 입력란 비우기
                 }
             });
-            /*
-            $.post("/mybatis/boards/"+bno+"/reply",
-                {text:$("#text").val(),
-                 writer:$("#writer").val()},
-                function(data,status,xhr){
-                    console.log("처리결과: "+status);
-                    if(status=="success"){
-                        getReplies();
-                    }
-                    if(status=="error"){
-                        alert("등록 실패!");
-                    }
-
-                }
-            );
-            */
-
         }
-        function showEitMode(){
+
+        function inputEnterKey(event) {
+            if (event.keyCode == 13) {
+                console.log("엔터키가 입력되었습니다.");
+                registReply();
+            }
+        }
+
+        function showEitMode() {
             $(".edit-mode").show();
             $(".default-mode").hide();
         }
+
         function showDefaultMode() {
             $(".edit-mode").hide();
             $(".default-mode").show();
         }
+
         function confirmDelete() {
             return confirm("정말 삭제 하시겠습니까?");
         }
 
-        function replyEditClicked(el){
-            $(el).parents("tr").css("background-color","yellow").find(".reply-edit-mode").show();
+        function replyEditClicked(el) {
+            $(el).parents("tr").css("background-color", "yellow").find(".reply-edit-mode").show();
             $(el).parents("tr").find(".reply-default-mode").hide();
         }
-        function replyEditCancel(el){
-            $(el).parents("tr").css("background-color","transparent").find(".reply-default-mode").show();
+
+        function replyEditCancel(el) {
+            $(el).parents("tr").css("background-color", "transparent").find(".reply-default-mode").show();
             $(el).parents("tr").find(".reply-edit-mode").hide();
         }
-        function reEditProc(el){
-            $(el).parents("tr").find(".re-edit-form").submit();
+
+        //댓글 수정처리(수정완료)
+        function reEditProc(el) {
+            //PK: rno, 수정data : text
+            //$(el).prev()
+            var rno = $(el).siblings(".rno-data").val();
+            var text = $(el).parents("tr").find(".text-data").val();
+
+            $.ajax({
+                url: "/mybatis/boards/" + bno + "/reply/" + rno,
+                type: "put",
+                data: {text: text},
+                success: function () {
+                    console.log("수정완료");
+                    rpage=1;
+                    setCount();
+                },
+                error: function () {
+                    alert("수정되지 않았어요");
+                }
+            });
         }
 
     </script>
 </head>
-<body >
-    <a href="/">HOME</a>
-    <p>마이바티스 게시글 상세페이지</p>
-    <form th:action="|/mybatis/boards/${detail.bno}|" method="post">
-        <ul>
-            <li>[[${detail.bno}]]</li>
-            <li>[[${detail.writer}]]</li>
-            <li>
-                <div class="default-mode">[[${detail.title}]]</div>
-                <div class="edit-mode"><input type="text" name="title" th:value="${detail.title}"></div>
-            </li>
-            <li>
-                <div class="default-mode">[[${detail.content}]]</div>
-                <div class="edit-mode">
-                    <textarea rows="5" cols="60" name="content">[[${detail.content}]]</textarea>
-                </div>
-            </li>
-            <li class="edit-mode">
-                <input type="hidden" name="_method" value="PUT">
-                <button type="submit">수정완료</button>
-                <button type="button" onclick="showDefaultMode()">취소</button>
-            </li>
-        </ul>
-    </form>
-    <div class="default-mode flex">
-        <button type="button" id="btn-edit" onclick="showEitMode()">수정</button>
-        <form th:action="@{/mybatis/boards/{bno}(bno=${detail.bno})}" method="post" onsubmit="return confirmDelete()">
-            <input type="hidden" name="_method" value="DELETE">
-            <button type="submit">삭제</button>
-        </form>
-    </div>
-    <hr>
-    <section>
-        <h1>댓글영역</h1>
-        <div>
-            <div>
-                <input type="text" id="text" placeholder="댓글입력">
-                <input type="hidden" id="writer" value="테스트">
-                <button type="button" onclick="registReply(this)">등록</button>
+<body>
+<a href="/">HOME</a>
+<p>마이바티스 게시글 상세페이지</p>
+<form th:action="|/mybatis/boards/${detail.bno}|" method="post">
+    <ul>
+        <li>[[${detail.bno}]]</li>
+        <li>[[${detail.writer}]]</li>
+        <li>
+            <div class="default-mode">[[${detail.title}]]</div>
+            <div class="edit-mode"><input type="text" name="title" th:value="${detail.title}"></div>
+        </li>
+        <li>
+            <div class="default-mode">[[${detail.content}]]</div>
+            <div class="edit-mode">
+                <textarea rows="5" cols="60" name="content">[[${detail.content}]]</textarea>
             </div>
-            <div id="display">댓글이 존재하지 않아요</div>
-
+        </li>
+        <li class="edit-mode">
+            <input type="hidden" name="_method" value="PUT">
+            <button type="submit">수정완료</button>
+            <button type="button" onclick="showDefaultMode()">취소</button>
+        </li>
+    </ul>
+</form>
+<div class="default-mode flex">
+    <button type="button" id="btn-edit" onclick="showEitMode()">수정</button>
+    <form th:action="@{/mybatis/boards/{bno}(bno=${detail.bno})}" method="post" onsubmit="return confirmDelete()">
+        <input type="hidden" name="_method" value="DELETE">
+        <button type="submit">삭제</button>
+    </form>
+</div>
+<hr>
+<section>
+    <h1>댓글영역</h1>
+    <div>
+        <div>
+            <input type="text" id="text" placeholder="댓글입력">
+            <input type="hidden" id="writer" value="테스트">
+            <button type="button" onclick="registReply()">등록</button>
         </div>
-    </section>
+        <div>
+            <table border="1">
+                <thead>
+                <tr>
+                    <th>댓글</th>
+                    <th>
+                        <div>작성자</div>
+                        <div>작성일</div>
+                    </th>
+                    <th>관리</th>
+                </tr>
+                </thead>
+                <tbody id="display">
+                </tbody>
+            </table>
+        </div>
+        <button type="button" id="btnAdd">더보기(+)</button>
+    </div>
+</section>
 
 </body>
 </html>

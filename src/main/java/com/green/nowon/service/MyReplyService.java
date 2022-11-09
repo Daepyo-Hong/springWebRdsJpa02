@@ -12,4 +12,8 @@ public interface MyReplyService {
     void update(long rno, String text);
 
     void getList(long bno, Model model);
+
+    void getList(long bno, int page, Model model);
+
+    int getCount(long bno);
 }
