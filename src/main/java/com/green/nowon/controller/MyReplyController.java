@@ -13,24 +13,27 @@ public class MyReplyController {
     @Autowired
     private MyReplyService service;
 
+    //댓글 모두 읽어오기
     @GetMapping("/mybatis/boards/{bno}/replies")
-
     public String replies(@PathVariable long bno, Model model){
         service.getList(bno, model);
-
-        return "board/replies";
+        //@ResponseBody 는 값을 전달하는 것임,
+        return "board/replies"; //응답을 다른 페이지로 처리(HTML 페이지 결과 페이지)
     }
     //댓글등록
-    @ResponseBody
+    @ResponseBody   //단일데이터, 객체, 등등 으로 값을 보낼(void로 응답할) 수 있음
+                    //자바스크립트 데이터 JSON(키:벨류) 로 자동 변환해줌(ajax success 함수로)
     @PostMapping("/mybatis/boards/{bno}/reply")
-    public void save(@PathVariable long bno, MyReply dto) {
+    public boolean save(@PathVariable long bno, MyReply dto) {
         service.save(bno, dto);
+        return true;
     }
 
+    //댓글삭제
+    @ResponseBody
     @DeleteMapping("/mybatis/boards/{bno}/reply/{rno}")
-    public String delete(@PathVariable long bno, @PathVariable long rno){
-        service.delete(rno);
-        return "redirect:/mybatis/boards/" + bno;
+    public int delete(@PathVariable long bno, @PathVariable long rno){
+        return service.delete(rno);
     }
 
     @PutMapping("/mybatis/boards/{bno}/reply/{rno}")

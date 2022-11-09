@@ -22,7 +22,7 @@
             </td>
             <td  class="reply-default-mode">
                 <button type="button" onclick="replyEditClicked(this)">수정</button>
-
+                <button type="button" th:onclick="|reDeleteProc(${dto.rno})|">삭제</button>
             </td>
             <td class="reply-edit-mode">
                 <button type="button" onclick="reEditProc(this)">수정완료</button>

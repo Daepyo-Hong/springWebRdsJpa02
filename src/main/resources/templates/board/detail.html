@@ -20,8 +20,22 @@
         var bno = "[[${detail.bno}]]";
         $(function (){
             getReplies();
-
         });
+
+        //댓글 삭제 처리
+        function reDeleteProc(rno){  //rno: 클릭시 전달받은 rno
+            //alert(rno);
+            $.ajax({
+                url: "/mybatis/boards/"+bno+"/reply/"+rno,
+                type: "delete",   //ajax 에서만 단순화 가능
+                //type: "post",
+                //data: {_method: "delete"},
+                success:function (result){   //result:삭제 행 개수
+                    console.log("삭제 개수:"+result);
+                    getReplies();
+                }
+            });
+        }
 
         //ajax로 댓글 갖고오는 함수
         function getReplies() {
@@ -33,18 +47,39 @@
         }
         //ajax로 댓글 등록
         function registReply(el){
+            let text = $("#text").val();
+            $.ajax({
+                url : "/mybatis/boards/"+bno+"/reply",
+                type : "post",
+                data : {            //data의 key는 쌍따옴표 있든 없든 문자열임(변수 아님)
+                    text : text,    //key(문자열) : value(현재 변수적용)
+                    writer : $("#writer").val()
+                },
+                error:function (error) {
+                    alert("댓글 등록이 정상적으로 처리되지 않았어요\n"+error);
+                },
+                success:function (result){
+                    console.log("처리결과: "+result);
+                    getReplies();
+                }
+            });
+            /*
             $.post("/mybatis/boards/"+bno+"/reply",
-                {text:$("#text").val(), writer:$("#writer").val()},
+                {text:$("#text").val(),
+                 writer:$("#writer").val()},
                 function(data,status,xhr){
                     console.log("처리결과: "+status);
-                    if(status=="seccess"){
+                    if(status=="success"){
                         getReplies();
                     }
                     if(status=="error"){
                         alert("등록 실패!");
                     }
+
                 }
             );
+            */
+
         }
         function showEitMode(){
             $(".edit-mode").show();

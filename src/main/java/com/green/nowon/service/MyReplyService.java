@@ -7,7 +7,7 @@ public interface MyReplyService {
 
     void save(long bno, MyReply dto);
 
-    void delete(long rno);
+    int delete(long rno);
 
     void update(long rno, String text);
 

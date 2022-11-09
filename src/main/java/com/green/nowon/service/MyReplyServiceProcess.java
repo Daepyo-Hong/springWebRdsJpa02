@@ -22,8 +22,9 @@ public class MyReplyServiceProcess implements MyReplyService {
     }
 
     @Override
-    public void delete(long rno) {
-        mapper.deleteByRno(rno);
+    public int delete(long rno) {
+        return mapper.deleteByRno(rno);
+        //System.out.println("삭제행 개수 : "+count);
     }
 
     @Override

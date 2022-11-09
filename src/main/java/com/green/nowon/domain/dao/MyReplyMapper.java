@@ -15,7 +15,7 @@ public interface MyReplyMapper {
     List<MyReply> findByBno(@Param("fk") long bno);
 
     @Delete("delete from my_reply where rno=#{rno}")
-    void deleteByRno(long rno);
+    int deleteByRno(long rno);
 
     @Update("update my_reply set text=#{text} where rno=#{rno}")
     void update(long rno, String text);
